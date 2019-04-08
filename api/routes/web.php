@@ -10,20 +10,18 @@
 | and give it the Closure to call when that URI is requested.
 |
 */
+use Laravel\Lumen\Routing\Router;
 
-
+/**
+ * @var $router Router
+ */
 $router->get('/', function () use ($router) {
 
- try {
-     $users  = DB::connection('mysql')->table('users')->get();
-     dd($users);
-     $config = Config::get('database');
- } catch (\Exception $e) {
-     dd($e->getMessage());
- }
-
- dd($config);
-
+     try {
+         $users  = DB::connection('mysql')->table('users')->get();
+         $config = Config::get('database');
+     } catch (\Exception $e) {
+     }
 
     return $router->app->version();
 });
