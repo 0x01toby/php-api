@@ -11,17 +11,42 @@
 |
 */
 use Laravel\Lumen\Routing\Router;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Config;
+use App\Http\Middleware\Authenticate;
+
+function v1() {
+    Route::get('example-index', "ExampleController@index");
+}
+
+// 绑定中间件
+function bindMiddleware(Router $router)
+{
+    $router->app->routeMiddleware([
+        'auth' => Authenticate::class
+    ]);
+}
 
 /**
  * @var $router Router
  */
-$router->get('/', function () use ($router) {
 
-     try {
-         $users  = DB::connection('mysql')->table('users')->get();
-         $config = Config::get('database');
-     } catch (\Exception $e) {
-     }
+bindMiddleware($router);
 
+Route::get('/', function () use ($router) {
     return $router->app->version();
+});
+
+// {{domain}}/api/v1/
+Route::group(['prefix' => 'api'], function () {
+    Route::group(['prefix' => 'v1', 'middleware' => 'auth'], function () {
+        v1();
+    });
+});
+
+// api.{{domain}}/v1/
+Route::group(['domain' => 'api' . Config::get('app.domain')], function () {
+    Route::group(['prefix' => 'v1', 'middleware' => 'auth'], function () {
+        v1();
+    });
 });

@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Auth\AuthManager;
 use Illuminate\Contracts\Auth\Factory as Auth;
 
 class Authenticate
@@ -35,6 +36,8 @@ class Authenticate
      */
     public function handle($request, Closure $next, $guard = null)
     {
+        /** @var AuthManager $auth */
+
         if ($this->auth->guard($guard)->guest()) {
             return response('Unauthorized.', 401);
         }

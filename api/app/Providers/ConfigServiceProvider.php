@@ -47,9 +47,7 @@ class ConfigServiceProvider extends ServiceProvider
         $this->app->singleton('config', function () {
             return new Repository();
         });
-        // $this->app->withFacades(true, [Config::class => 'Config']);
-        Facade::setFacadeApplication($this->app);
-        class_alias(Config::class, "Config");
+        $this->app->withFacades(true, [Config::class => 'Config']);
     }
 
 }
