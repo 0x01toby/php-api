@@ -11,6 +11,19 @@
 |
 */
 
+
 $router->get('/', function () use ($router) {
+
+ try {
+     $users  = DB::connection('mysql')->table('users')->get();
+     dd($users);
+     $config = Config::get('database');
+ } catch (\Exception $e) {
+     dd($e->getMessage());
+ }
+
+ dd($config);
+
+
     return $router->app->version();
 });
