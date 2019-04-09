@@ -7,23 +7,19 @@
  */
 return [
     'defaults' => [
-        'guard' => 'api',
+        'guard' => 'custom_api',
     ],
 
     'guards' => [
-        'api' => [
-            'driver' => 'api',
-            'provider' => ''
+        'custom_api' => [
+            'driver' => 'custom_api_driver', // 自定义driver 需要通过 Auth::extends来实现
+            'provider' => 'custom_api_provider'
         ]
     ],
 
     'providers' => [
-        ''
+        'custom_api_provider' => [
+            'model' => \App\Models\User::class,
+        ],
     ],
-
-    'passwords' => [
-        ''
-    ]
-
-
 ];
