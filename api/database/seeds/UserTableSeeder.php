@@ -3,8 +3,9 @@
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Date;
 
-class UsersTableSeeder extends Seeder
+class UserTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -13,16 +14,27 @@ class UsersTableSeeder extends Seeder
      */
     public function run()
     {
+        $salt = $this->genSalt();
+        $now = Date::createFromTimestamp(time());
+        $email = $this->genEmail();
         DB::table('users')->insert([
-            'username' => $this->genName(),
-            'email' => $this->genEmail(),
-            'password' => encrypt($this->genPassport() . $this->genSalt()),
-            'salt' => $this->genSalt(),
-            'custom_token' => $this->genToken(),
+            'username' => $this->genUserName(),
+            'nickname' => $this->genNickName(),
+            'email' => $email,
+            'password' => encrypt($this->genPassword() . $salt),
+            'salt' => encrypt($salt),
+            'custom_token' => encrypt(base64_encode($email). '|' . $now->toDateTimeLocalString() . '|' .  Str::random(16)),
+            'created_at' => $now,
+            'updated_at' => $now,
         ]);
     }
 
-    public function genName()
+    public function genUserName()
+    {
+        return Str::random(10);
+    }
+
+    public function genNickName()
     {
         $xing = ['赵','钱','孙','李','周','吴','郑','王','冯','陈','褚','卫','蒋','沈','韩','杨','朱','秦','尤','许','何','吕','施','张','孔','曹','严','华','金','魏','陶','姜','戚','谢','邹',
             '喻','柏','水','窦','章','云','苏','潘','葛','奚','范','彭','郎','鲁','韦','昌','马','苗','凤','花','方','任','袁','柳','鲍','史','唐','费','薛','雷','贺','倪','汤','滕','殷','罗',
@@ -51,18 +63,18 @@ class UsersTableSeeder extends Seeder
         return Str::random(10) . '@163.com';
     }
 
-    public function genPassport()
+    public function genPassword()
     {
         return "test123";
     }
 
     public function genSalt()
     {
-        return "&x@18d4dy";
+        return Str::random(10);
     }
 
     public function genToken()
     {
-        return "test_token";
+        return Str::random(32);
     }
 }

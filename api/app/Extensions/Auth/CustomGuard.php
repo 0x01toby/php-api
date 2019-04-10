@@ -14,6 +14,7 @@ use Illuminate\Auth\GuardHelpers;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Support\Facades\Date;
 
 class CustomGuard implements Guard
 {
@@ -36,7 +37,7 @@ class CustomGuard implements Guard
      *
      * @var \Illuminate\Contracts\Auth\Authenticatable
      */
-    protected $lastAttempted;
+    public $lastAttempted;
 
     public function __construct(
         $name,
@@ -55,6 +56,7 @@ class CustomGuard implements Guard
      */
     public function user()
     {
+
         if ($this->logged_out) {
             return null;
         }
@@ -63,11 +65,35 @@ class CustomGuard implements Guard
             return $this->user;
         }
 
-        if ($id = $this->request->get('id')) {
+        // 走登录逻辑
+        if ($id = $this->request->get('email')) {
             return  $this->user = $this->provider->retrieveById($id);
         }
 
         return null ;
+    }
+
+    /**
+     * 登录则更新当前用户的最后登录时间
+     * @param User $user
+     */
+    public function login(User $user)
+    {
+        list($user_email, $user_date, $user_real_token) = explode('|', decrypt($user->getRememberToken()));
+
+        $token = encrypt(
+            $user_email . "|" .
+            Date::createFromTimestamp(time())->toDateTimeLocalString() . "|" .
+            $user_real_token
+        );
+
+        $this->provider->updateRememberToken($user,  $token);
+
+        $user->setAttribute($user->getRememberTokenName(), $token);
+
+        $this->setUser($user);
+
+        // Login Event
     }
 
     public function id()

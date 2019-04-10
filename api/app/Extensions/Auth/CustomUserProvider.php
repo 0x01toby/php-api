@@ -37,7 +37,7 @@ class CustomUserProvider implements UserProvider
      */
     public function retrieveById($identifier)
     {
-        return $this->model::query()->find($identifier);
+        return $this->model::query()->where('email', '=', $identifier)->first();
     }
 
     /**
@@ -49,9 +49,16 @@ class CustomUserProvider implements UserProvider
      */
     public function retrieveByToken($identifier, $token)
     {
-        $user = $this->retrieveById($identifier);
+        if (empty($user = $this->retrieveById($identifier))) {
+            return null;
+        }
 
-        return $user && $user->getRememberToken() && hash_equals($user->getRememberToken(), $token)
+        $user_remember_token = $user->getRememberToken();
+
+        list($email, $date, $real_token) = explode('|', decrypt($token));
+        list($user_email, $user_date, $user_real_token) = explode('|', decrypt($user_remember_token));
+
+        return $user && $user_remember_token && hash_equals($email, $user_email) && hash_equals($real_token, $user_real_token)
             ? $user : null;
     }
 
@@ -77,19 +84,13 @@ class CustomUserProvider implements UserProvider
      */
     public function retrieveByCredentials(array $credentials)
     {
-        if (empty($credentials)) {
+        if (!(isset($credentials['token']) && is_string($credentials['token']))) {
             return null;
         }
 
-        $query = $this->model::query();
-        foreach ($credentials as  $key => $credential) {
-            if ($credential instanceof Arrayable) {
-                $query->whereIn($key, $credential);
-            } else {
-                $query->where($key, $credential);
-            }
-        }
-        return $query->first();
+        list($email_base64, $date, $real_token) = explode('|', decrypt($credentials['token']));
+
+        return $this->retrieveByToken(base64_decode($email_base64), $credentials['token']);
     }
 
     /**
@@ -101,7 +102,12 @@ class CustomUserProvider implements UserProvider
      */
     public function validateCredentials(Authenticatable $user, array $credentials)
     {
-        return hash_equals($user->getAuthPassword(), $credentials['password']);
+
+        list($user_email_base64, $user_login_date, $user_real_token) = $user->getCustomToken();
+        list($email_base64, $login_date, $real_token)  = explode('|', decrypt($credentials['token']));
+
+        return hash_equals($user_email_base64 . $user_real_token, $email_base64 . $real_token)
+            && (strtotime($user_login_date) - strtotime($login_date) <= 24 * 3600 * 30);
     }
 
 

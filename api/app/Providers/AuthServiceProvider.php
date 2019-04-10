@@ -29,6 +29,7 @@ class AuthServiceProvider extends ServiceProvider
          * 实现自定义的 guard creator 的driver
          */
         $this->app['auth']->extend('custom_api_driver', function ($app, $name, $config) {
+
             // $app app 对象， $name guard字符串 $config auth.guards.$name 配置文件
             /** @var  $app['auth'] AuthManager */
             $guard = new CustomGuard($name, $app['auth']->createUserProvider($config['provider']));
@@ -54,10 +55,10 @@ class AuthServiceProvider extends ServiceProvider
         // the User instance via an API token or any other method necessary.
 
         /** @var AuthManager $auth */
-        $this->app['auth']->viaRequest('api', function ($request) {
+       /* $this->app['auth']->viaRequest('api', function ($request) {
             if ($request->input('api_token')) {
                 return User::where('api_token', $request->input('api_token'))->first();
             }
-        });
+        });*/
     }
 }

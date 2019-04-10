@@ -37,6 +37,8 @@ Route::get('/', function () use ($router) {
     return $router->app->version();
 });
 
+Route::post('login', "LoginController@login");
+
 // {{domain}}/api/v1/
 Route::group(['prefix' => 'api'], function () {
     Route::group(['prefix' => 'v1', 'middleware' => 'auth'], function () {

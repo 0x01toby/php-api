@@ -13,13 +13,14 @@ return [
     'guards' => [
         'custom_api' => [
             'driver' => 'custom_api_driver', // 自定义driver 需要通过 Auth::extends来实现
-            'provider' => 'custom_api_provider'
+            'provider' => 'custom_api'
         ]
     ],
 
     'providers' => [
-        'custom_api_provider' => [
+        'custom_api' => [
             'model' => \App\Models\User::class,
+            'driver' => 'custom_api_provider'
         ],
     ],
 ];
