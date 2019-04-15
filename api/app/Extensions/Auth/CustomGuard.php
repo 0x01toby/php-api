@@ -121,6 +121,7 @@ class CustomGuard implements Guard
     public function setUser(Authenticatable $user)
     {
         $this->user = $user;
+        app()->instance(User::class, $user);
     }
 
     public function logout()

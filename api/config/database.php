@@ -3,7 +3,7 @@
 return [
     "default" => env('DB_CONNECTION', 'mysql'),
 
-
+    // 数据库 migration记录表
     'migrations' => 'migrations',
 
     // 数据库配置
@@ -22,7 +22,6 @@ return [
 
     // redis 配置
     'redis' => [
-
         // redis 队列配置
         'queue' => [
             'host'      => env("REDIS_QUEUE_HOST", '127.0.0.1'),

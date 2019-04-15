@@ -13,13 +13,14 @@ use Illuminate\Contracts\Database\ModelIdentifier;
 use Illuminate\Contracts\Queue\QueueableEntity;
 use Illuminate\Support\Str;
 use App\Models\User;
+use Illuminate\Support\Facades\Config;
 
-class Service
+abstract class Service
 {
     /**
      * @var $user User
      */
-    private $user;
+    public $user;
 
     protected $queue = 'async_service';
 
@@ -76,7 +77,7 @@ class Service
                 'method' => $method_name,
                 'args'   => $arguments,
                 'configs' => [
-                    'log_id' => \Config::get('log_id')
+                    'log_id' => Config::get('log_id')
                 ]
             ];
 

@@ -81,6 +81,7 @@ $app->singleton(
  $app->register(\App\Providers\ConfigServiceProvider::class);
  $app->register(\App\Providers\DBServiceProvider::class);
  $app->register(App\Providers\AuthServiceProvider::class);
+ $app->register(\Illuminate\Redis\RedisServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
 /*
 |--------------------------------------------------------------------------

@@ -17,6 +17,8 @@ use App\Http\Middleware\Authenticate;
 
 function v1() {
     Route::get('example-index', "ExampleController@index");
+    Route::post("example-add", "ExampleController@add");
+    Route::post("example-async", "ExampleController@async");
 }
 
 // 绑定中间件

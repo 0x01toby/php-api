@@ -32,7 +32,7 @@ class AsyncService extends Job
      */
     public function handle()
     {
-        Auth::login($this->user);
+        Auth::setUser($this->user);
         $payload = unserialize($this->payload);
         try {
             $args = $this->getArguments($payload['args']);
