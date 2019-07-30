@@ -8,8 +8,7 @@
 
 namespace App\Providers;
 
-
-use Carbon\Laravel\ServiceProvider;
+use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\DatabaseServiceProvider;
 use Illuminate\Support\Facades\DB;
 
@@ -19,7 +18,7 @@ class DBServiceProvider extends ServiceProvider
     public function register()
     {
        $this->app->register(DatabaseServiceProvider::class);
-        $this->app->withFacades(true, [DB::class => 'DB']);
+       $this->app->withFacades(true, [DB::class => 'DB']);
     }
 
 }

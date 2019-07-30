@@ -2,7 +2,8 @@
 
 namespace App\Providers;
 
-use App\Models\User;
+use App\Extensions\Auth\JwtGuard;
+use App\Extensions\Auth\JwtUserProvider;
 use Illuminate\Auth\AuthManager;
 use App\Extensions\Auth\CustomGuard;
 use Illuminate\Support\ServiceProvider;
@@ -29,7 +30,6 @@ class AuthServiceProvider extends ServiceProvider
          * 实现自定义的 guard creator 的driver
          */
         $this->app['auth']->extend('custom_api_driver', function ($app, $name, $config) {
-
             // $app app 对象， $name guard字符串 $config auth.guards.$name 配置文件
             /** @var  $app['auth'] AuthManager */
             $guard = new CustomGuard($name, $app['auth']->createUserProvider($config['provider']));
@@ -38,6 +38,19 @@ class AuthServiceProvider extends ServiceProvider
                 $guard->setRequest($app['request']);
             }
 
+            return $guard;
+        });
+
+        /**
+         * 使用jwt作为鉴权
+         */
+        $this->app['auth']->provider('custom_jwt_provider', function ($app, $config) {
+            $user_provider = new JwtUserProvider($app, $config);
+            return $user_provider;
+        });
+
+        $this->app['auth']->extend('custom_jwt_driver', function ($app, $name, $config) {
+            $guard = new JwtGuard($name, $app['auth']->createUserProvider($config['provider']));
             return $guard;
         });
     }

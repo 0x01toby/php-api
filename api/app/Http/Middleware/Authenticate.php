@@ -2,10 +2,13 @@
 
 namespace App\Http\Middleware;
 
+use App\Extensions\Auth\Jwt\JwtServer;
+use App\Extensions\Helper\Helpers;
 use Closure;
 use Illuminate\Auth\AuthManager;
 use Illuminate\Contracts\Auth\Factory as Auth;
 use Illuminate\Support\Facades\Config;
+use Ramsey\Uuid\Uuid;
 
 class Authenticate
 {
@@ -37,8 +40,6 @@ class Authenticate
      */
     public function handle($request, Closure $next, $guard = null)
     {
-        /** @var AuthManager $auth */
-
         if (Config::get("is_from_mobile")) {
             $credentials['token'] = $request->input('custom_token');
         } else {

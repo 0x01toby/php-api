@@ -14,6 +14,7 @@ use Laravel\Lumen\Routing\Router;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Config;
 use App\Http\Middleware\Authenticate;
+use App\Http\Middleware\DefaultGuard;
 
 function v1() {
     Route::get('example-index', "ExampleController@index");
@@ -25,7 +26,8 @@ function v1() {
 function bindMiddleware(Router $router)
 {
     $router->app->routeMiddleware([
-        'auth' => Authenticate::class
+        'auth' => Authenticate::class,
+        'default-guard' => DefaultGuard::class,
     ]);
 }
 
@@ -37,6 +39,21 @@ bindMiddleware($router);
 
 Route::get('/', function () use ($router) {
     return $router->app->version();
+});
+
+Route::group(['prefix' => 'guard', 'middleware' => 'default-guard'], function ($router) {
+    Route::get('/', function () use ($router) {
+        return $router->app->version();
+    });
+    Route::post("/login", function () {
+
+    });
+    Route::group(['middleware' => 'auth'], function () {
+        Route::get("/test", function ($router) {
+            return $router->app->version();
+        });
+    });
+
 });
 
 Route::post('login', "LoginController@login");
