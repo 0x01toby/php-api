@@ -45,6 +45,13 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
+        if ($exception instanceof ModelNotFoundException) {
+            return response()->json(['code' => 404, "message" => $exception->getMessage(), 'data' => null]);
+        } else if ($exception instanceof ValidationException) {
+            return response()->json(['code' => 400, "message" => $exception->getMessage(), 'data' => null]);
+        } else if ($exception instanceof AuthorizationException) {
+            return response("Unauthorized.", 401);
+        }
         return parent::render($request, $exception);
     }
 }
