@@ -4,13 +4,16 @@
 namespace App\Extensions\Auth;
 
 
+use App\Extensions\Auth\Jwt\JwtService;
 use App\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\UserProvider;
+use Illuminate\Support\Arr;
+use Laravel\Lumen\Application;
 
 class JwtUserProvider implements UserProvider
 {
-    // 全局app
+    /** @var $app Application */
     protected $app;
     // 配置文件
     protected $config;
@@ -29,18 +32,44 @@ class JwtUserProvider implements UserProvider
         $this->model = $config['model'];
     }
 
+    /**
+     * 获取用户信息
+     * @param mixed $identifier
+     * @return Authenticatable|null
+     */
     public function retrieveById($identifier)
     {
         return $this->model::where('email', '=', $identifier)->first();
     }
 
+    /**
+     * 验证和获取claims
+     * @param $token
+     * @return bool | array
+     */
+    public function retrieveByJwtToken($token)
+    {
+        if (!$claims = $this->app->make(JwtService::class)->validToken($token)) {
+            return false;
+        }
+        return $claims;
+    }
+
+    /**
+     * 验证token是否有效
+     * @param mixed $identifier
+     * @param string $token
+     * @return bool|Authenticatable|null
+     */
     public function retrieveByToken($identifier, $token)
     {
         if (!$user = $this->retrieveById($identifier)) {
             return false;
         }
-        // todo $user 和 token 进行对比鉴权
-        return false;
+        if (!$claims = $this->retrieveByJwtToken($token)) {
+            return false;
+        }
+        return hash_equals($identifier, Arr::get($claims, "uid", ""));
     }
 
     public function updateRememberToken(Authenticatable $user, $token)

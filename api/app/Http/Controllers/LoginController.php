@@ -8,9 +8,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Extensions\Helper\Helpers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
 use Symfony\Component\HttpFoundation\Cookie;
 
 class LoginController extends Controller
@@ -38,10 +40,10 @@ class LoginController extends Controller
         Auth::login($this->user);
 
         return response()->json([
-            'data' => $this->user,
+            'data' => [ 'user' => $this->user, 'token' => Auth::getToken(), 'domain' => env("APP_URL")],
             'code' => 0,
             'message' => 'success'
-        ])->withCookie(new Cookie('custom_token', $this->user->custom_token));
+        ])->withCookie(new Cookie('token', Auth::getToken(), Helpers::getNowTime() + Config::get("jwt.expire"), "/", env("APP_NAME")));
     }
 
 }

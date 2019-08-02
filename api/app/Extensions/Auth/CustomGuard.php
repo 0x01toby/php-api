@@ -32,6 +32,7 @@ class CustomGuard implements Guard
 
     protected $logged_out = false;
 
+    protected $token = "";
     /**
      * The user we last attempted to retrieve.
      *
@@ -89,11 +90,18 @@ class CustomGuard implements Guard
 
         $this->provider->updateRememberToken($user,  $token);
 
+        $this->token = $token;
+
         $user->setAttribute($user->getRememberTokenName(), $token);
 
         $this->setUser($user);
 
         // Login Event
+    }
+
+    public function getToken()
+    {
+        return $this->token;
     }
 
     public function id()

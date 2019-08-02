@@ -18,13 +18,13 @@ use Lcobucci\JWT\Signer\Key;
  * Class JwtServer
  * @package App\Extensions\Auth\Jwt
  */
-class JwtServer
+class JwtService
 {
     /** @var Application $app */
     protected $app;
     protected $config;
 
-    public function __construct(Application $app)
+    public function __construct($app)
     {
         $this->app = $app;
         $this->config = $app['config'];

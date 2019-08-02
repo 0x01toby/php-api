@@ -11,7 +11,6 @@ namespace App\Providers;
 
 use Illuminate\Config\Repository;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\ServiceProvider;
 
 class ConfigServiceProvider extends ServiceProvider

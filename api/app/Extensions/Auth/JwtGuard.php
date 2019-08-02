@@ -4,10 +4,14 @@
 namespace App\Extensions\Auth;
 
 
+use App\Extensions\Auth\Jwt\JwtService;
 use App\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Contracts\Auth\UserProvider;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
+use Laravel\Lumen\Http\Request;
 
 class JwtGuard implements Guard
 {
@@ -20,6 +24,12 @@ class JwtGuard implements Guard
     /** @var UserProvider 用户 */
     protected $provider;
 
+    /** @var $request Request */
+    protected $request;
+
+    /** @var $jwt_token  */
+    protected $jwt_token;
+
     public function __construct(
         $name,
         UserProvider $provider      // authServerProvider 中 provider 配置
@@ -30,13 +40,39 @@ class JwtGuard implements Guard
         $this->provider = $provider;
     }
 
+    /**
+     * 设置request
+     * @param Request $request
+     */
+    public function setRequest(Request $request)
+    {
+        $this->request = $request;
+    }
+
+    /**
+     * 用户登陆
+     * @param User $user
+     */
     public function login(User $user)
     {
         // user 对象 => 生成jwt token
-
-
+        $this->jwt_token = app(JwtService::class)->getToken($user->getAttribute("email"));
+        $this->setUser($user);
     }
 
+    /**
+     * 获取jwt token
+     * @return string
+     */
+    public function getToken()
+    {
+        return $this->jwt_token;
+    }
+
+    /**
+     * 检查用户是否有效
+     * @return bool
+     */
     public function check()
     {
        return $this->user() ? true : false;
@@ -48,10 +84,7 @@ class JwtGuard implements Guard
      */
     public function guest()
     {
-        if (! $this->check()) {
-            return false;
-        }
-        return true;
+        return ! $this->check();
     }
 
     /**
@@ -80,9 +113,14 @@ class JwtGuard implements Guard
         if ($this->user) {
             return $this->user;
         }
-        // 从http 中恢复user
 
-        return $this->user = null;
+        $jwt_token = $this->getJwtTokenFromRequest();
+        if (empty(trim($jwt_token))) {
+            return $this->user = null;
+        }
+        // 从 http request 中恢复用户信息
+        $claims = $this->provider->retrieveByJwtToken($jwt_token);
+        return $this->user = $this->provider->retrieveById(Arr::get($claims, "uid", null));
     }
 
     /**
@@ -95,9 +133,26 @@ class JwtGuard implements Guard
         if (!$this->user()) {
             return false;
         }
-
         return $this->provider->validateCredentials($this->user, $credentials);
+    }
 
+    /**
+     * 获取jwt token
+     * @return string
+     */
+    protected function getJwtTokenFromRequest()
+    {
+        if ($authorization = $this->request->header('Authorization')) {
+            if (Str::contains($authorization, "Bearer")) {
+                return $this->jwt_token = trim(str_replace("Bearer", "", $authorization));
+            }
+        }
+
+        if (trim($this->request->query("Authorization", ""))) {
+            return $this->jwt_token = trim($this->request->query("Authorization", ""));
+        }
+
+        return $this->jwt_token = $this->request->cookie("token", "");
     }
 
 }

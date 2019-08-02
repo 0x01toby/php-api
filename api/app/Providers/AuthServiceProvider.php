@@ -6,6 +6,7 @@ use App\Extensions\Auth\JwtGuard;
 use App\Extensions\Auth\JwtUserProvider;
 use Illuminate\Auth\AuthManager;
 use App\Extensions\Auth\CustomGuard;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 use App\Extensions\Auth\CustomUserProvider;
 
@@ -51,6 +52,9 @@ class AuthServiceProvider extends ServiceProvider
 
         $this->app['auth']->extend('custom_jwt_driver', function ($app, $name, $config) {
             $guard = new JwtGuard($name, $app['auth']->createUserProvider($config['provider']));
+            if (method_exists($guard, 'setRequest')) {
+                $guard->setRequest($app['request']);
+            }
             return $guard;
         });
     }

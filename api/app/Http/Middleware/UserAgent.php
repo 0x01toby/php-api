@@ -20,11 +20,11 @@ class UserAgent
 
         $user_agent = strtolower($request->header('user-agent', ''));
         if (Str::contains($user_agent, ['iphone', 'ipod']) || Str::contains($user_agent, 'android')) {
-            Config::set('is_from_mobile', true);
+            Config::set('is_mobile', true);
         }
 
         if (Str::contains($user_agent, 'micromessenger')) {
-            Config::set('is_from_mobile', true);
+            Config::set('is_mobile', true);
         }
 
         return $next($request);

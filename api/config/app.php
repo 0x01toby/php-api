@@ -10,5 +10,6 @@ return [
     // 配置对称加密 详细代码见 encrypter => Illuminate\Encryption\EncryptionServiceProvider
     'key'       => env('APP_KEY'),
     'cipher'    => 'AES-256-CBC',
-    'url'       => env('APP_URL')
+    'url'       => env('APP_URL'),
+    'app_name'  => env('APP_NAME')
 ];

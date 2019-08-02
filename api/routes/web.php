@@ -12,62 +12,27 @@
 */
 use Laravel\Lumen\Routing\Router;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Config;
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\DefaultGuard;
+use \App\Http\Middleware\UserAgent;
 
-function v1() {
-    Route::get('example-index', "ExampleController@index");
-    Route::post("example-add", "ExampleController@add");
-    Route::post("example-async", "ExampleController@async");
-}
-
-// 绑定中间件
-function bindMiddleware(Router $router)
+/**
+ * 注册中间件
+ * @param Router $router
+ */
+$bind = function(Router $router)
 {
     $router->app->routeMiddleware([
         'auth' => Authenticate::class,
+        'user-agent' => UserAgent::class,
         'default-guard' => DefaultGuard::class,
     ]);
-}
+};
+/** @var $router Router */
+$bind($router);
 
-/**
- * @var $router Router
- */
+Route::post("login", "LoginController@login");
 
-bindMiddleware($router);
-
-Route::get('/', function () use ($router) {
-    return $router->app->version();
-});
-
-Route::group(['prefix' => 'guard', 'middleware' => 'default-guard'], function ($router) {
-    Route::get('/', function () use ($router) {
-        return $router->app->version();
-    });
-    Route::post("/login", function () {
-
-    });
-    Route::group(['middleware' => 'auth'], function () {
-        Route::get("/test", function ($router) {
-            return $router->app->version();
-        });
-    });
-
-});
-
-Route::post('login', "LoginController@login");
-
-// {{domain}}/api/v1/
-Route::group(['prefix' => 'api'], function () {
-    Route::group(['prefix' => 'v1', 'middleware' => 'auth'], function () {
-        v1();
-    });
-});
-
-// api.{{domain}}/v1/
-Route::group(['domain' => 'api' . Config::get('app.domain')], function () {
-    Route::group(['prefix' => 'v1', 'middleware' => 'auth'], function () {
-        v1();
-    });
+Route::group(['prefix' => 'api/v1', 'namespace' => "Api\\V1", "middleware" => ['user-agent', 'default-guard', 'auth']], function () {
+    \App\Http\Router\Api\V1\Router::route();
 });

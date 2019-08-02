@@ -7,7 +7,7 @@
  */
 return [
     'defaults' => [
-        'guard' => 'custom_api',
+        'guard' => 'custom_jwt',
     ],
 
     'guards' => [
