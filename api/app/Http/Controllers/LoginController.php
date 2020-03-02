@@ -13,6 +13,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Cookie;
 
 class LoginController extends Controller
@@ -36,6 +37,8 @@ class LoginController extends Controller
         if (!hash_equals($this->user->getAuthPassword(), $password . $this->user->salt)) {
             return $this->jsonFailed(1012, 'login failed.');
         }
+
+        Log::info("sdfasdfasdfasdf2", ['sdfasdf', 'asdfasdf']);
 
         Auth::login($this->user);
 
